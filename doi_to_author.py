@@ -26,7 +26,7 @@ def main():
     input_df = pd.read_csv(config['input_file'])
 
     # create output file
-    out_file_name = 'output_doi.csv'
+    out_file_name = 'output_doi_to_author.csv'
 
     with open(out_file_name, 'w', newline='', encoding='utf-8') as o:
         writer = csv.writer(o)

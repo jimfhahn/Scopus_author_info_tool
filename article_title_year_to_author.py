@@ -28,7 +28,7 @@ def main():
     input_df = pd.read_csv(config['input_file'])
 
     # create output file
-    out_file_name = 'output.csv'
+    out_file_name = 'output_title_year_to_author.csv'
 
     with open(out_file_name, 'w', newline='', encoding='utf-8') as o:
         writer = csv.writer(o)

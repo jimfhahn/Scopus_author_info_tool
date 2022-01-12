@@ -5,7 +5,7 @@ This project tries to streamline author information retrieval from Scopus API fo
 
 ## Step-by-Step Guide
 
-### Article title to author inform (given name, surname and author id)
+### Article title&year to author inform (given name, surname and author id)
 1. Make sure you have elsapy and Pandas installed in your environment. I used Python 3.8 and 3.9 to develop these scripts, so you should be fine with Python Version >= 3.8. However, I suspect lower version Python 3 still works.
 2. Update the config.json file with your API key, INSTOKEN, and a file path pointing to the input file.
 3. Your input file needs to be in .cvs format. It should contain those three columns with the exact column heads (i.e., case matters): "ID" (unique id for an article), "title" (the title of the article), and "year" (the publication year of the article). We will search the SCOPUS database by the article title and publication year.

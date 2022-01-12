@@ -4,13 +4,14 @@
 This project tries to streamline author information retrieval from Scopus API for author focused bibliometric data analysis. Currently, by following the step-by-step guide, you can convert a list of articles with title and publication year to their author information, including the given name, surname, and author id. Specifically, by having the author id, you can locate more information about the author from Scopus, such as the author's affiliations. For more information, read the [Scopus data structure description](https://github.com/ElsevierDev/elsapy/wiki/Understanding-the-data).
 
 ## Step-by-Step Guide
-Article title to author inform (given name, surname and author id)
+
+### Article title to author inform (given name, surname and author id)
 1. Make sure you have elsapy and Pandas installed in your environment. I used Python 3.8 and 3.9 to develop these scripts, so you should be fine with Python Version >= 3.8. However, I suspect lower version Python 3 still works.
 2. Update the config.json file with your API key, INSTOKEN, and a file path pointing to the input file.
 3. Your input file needs to be in .cvs format. It should contain those three columns with the exact column heads (i.e., case matters): "ID" (unique id for an article), "title" (the title of the article), and "year" (the publication year of the article). We will search the SCOPUS database by the article title and publication year.
 4. Run article_title_year_to_author.py first. It will capture most articles, but there will be a few that cannot be located by a title+year combination. Failed articles will be stored in a file called error_log.txt
 5. The output file from this step: output_title_year_to_author.csv contains the following columns: "ID" (the id of the article), "original_title" (the title you gave in the input file), "scp_title" (the title of the item retrieved from the query), "title_match(true/false)" (whether the title supplied and the title retrieved match, the false ones needs inspection), "author_given_name" (the given name of the author), "author_surname" (the surname of the author), "author_id" (the Scopus internal id assigned to the author).
-6. Inspect rows where "title_match(true/false)" is false. Sometimes, you still retrieved the right article, it is just the title is expressed differently. For example, one common thing I found is that the ':' in a title is converted to '-', causing a failed exact match. On the other hand, you should record the article id of the rows whose original_title and scp_title are apparent mismatch. **Remember to remove those true mismatched before you do Step 11 later.**
+6. Inspect rows where "title_match(true/false)" is false. Sometimes, you still retrieved the right article, it is just the title is expressed differently. For example, one common thing I found is that the ':' in a title is converted to '-', causing a failed exact match. On the other hand, you should record the article id of the rows whose original_title and scp_title are apparent mismatch. **Remember to remove those true mismatches before you do Step 11.**
 7. What to do with the true mismatch? Those articles needs manual work. You will search their titles in Google Scholar or scopus and find the correct doi for each article. Start an excel sheet and create two columns: "ID" and "doi" (case matters), and record the article ID and doi. When you finish, save the file into a .csv format.
 8. You also need to deal with the failed cases (e.g., query returns zero article). Open the error_log.txt. It records the paper ID and the reason for failure. You will have to find the DOIs of those articles manually. Continue working with the file you created in Step 7, and write down article id and their dois.
 9. Update the config.json file again with the file path pointing to the new input file you created in Step 8. 
@@ -19,3 +20,9 @@ Article title to author inform (given name, surname and author id)
 12. You have to manually identify the author information for those articles in error_log_doi.txt, and fill the author information into the file generated in Step 11.
 
 ## Code Description
+article_title_year_to_author.py: convert article information (title and publication year) to an author list with author given name, author surname, and author id. Developed using [elsapy Python module](https://github.com/ElsevierDev/elsapy).
+
+doi_to_author.py: convert article information (doi) to author lists with author given name, author surname, and author id. Developed using [elsapy Python module](https://github.com/ElsevierDev/elsapy).
+
+Author: Yuanxi Fu @yuanxiesa
+Submit issues if you have any question and comments about the code.

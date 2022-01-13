@@ -25,4 +25,4 @@ article_title_year_to_author.py: convert article information (title and publicat
 doi_to_author.py: convert article information (doi) to author lists with author given name, author surname, and author id. Developed using [elsapy Python module](https://github.com/ElsevierDev/elsapy).
 
 Author: Yuanxi Fu (@yuanxiesa)  
-Submit issues if you have any question and comments about the code.
+Submit issues if you have any question or comment about the code.

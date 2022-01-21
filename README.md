@@ -1,7 +1,7 @@
 # Scopus Author Info Tool
 
 ## Project Description
-This project tries to streamline author information retrieval from Scopus API for author for bibliometric data analysis. Currently, by following the step-by-step guide, you can convert a list of articles with title and publication year to their author information, including the given name, surname, and author id. Specifically, by having the author id, you can locate more information about the author from Scopus, such as the author's affiliations. For more information, read the [Scopus data structure description](https://github.com/ElsevierDev/elsapy/wiki/Understanding-the-data).
+This project tries to streamline author information retrieval from Scopus API for bibliometric data analysis. Currently, by following the step-by-step guide, you can convert a list of articles with title and publication year to their author information, including the given name, surname, and author id. Specifically, by having the author id, you can locate more information about the author from Scopus, such as the author's affiliations. For more information, read the [Scopus data structure description](https://github.com/ElsevierDev/elsapy/wiki/Understanding-the-data).
 
 ## Step-by-Step Guide
 

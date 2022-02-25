@@ -107,7 +107,7 @@ def single_doc_processing(ID, title_str, year):
                 return 'Read document failed'
         else:
             print("Empty set returned")
-            error_log_writing(ID, "Read document failed.")
+            error_log_writing(ID, "Empty set returned")
             return 'Empty set returned'
     except:
         print('Other errors, likely query concatenation error')

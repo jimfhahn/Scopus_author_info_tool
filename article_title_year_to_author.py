@@ -114,8 +114,8 @@ def single_doc_processing(ID, title_str, year, error_log_name):
                 error_log_writing(ID, "Read document failed.", error_log_name)
                 return 'Read document failed'
         else:
-            print("Empty set returned -- likely article not indexed in Scopus")
-            error_log_writing(ID, "Empty set returned -- likely article not indexed in Scopus", error_log_name)
+            print("Empty set returned")
+            error_log_writing(ID, "Empty set returned", error_log_name)
             return 'Empty set returned'
     except:
         print('Other errors, likely query concatenation error')

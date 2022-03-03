@@ -7,7 +7,6 @@ import pandas as pd
 import json
 import csv
 
-
 def main():
 
     print("Please make sure to update the config.json file with your API key, INSTOKEN, and input data file path!")
@@ -28,7 +27,7 @@ def main():
     input_df = pd.read_csv(config['input_file'])
 
     # create output file
-    out_file_name = 'output_title_year_to_author.csv'
+    out_file_name = 'output.csv'
 
     with open(out_file_name, 'w', newline='', encoding='utf-8') as o:
         writer = csv.writer(o)
@@ -37,6 +36,12 @@ def main():
              'author_id'])
 
         for ID, title, year in zip(input_df['ID'], input_df['title'], input_df['year']):
+
+            ## ensure correct data types
+            ID = int(ID)
+            title = str(title)
+            year = int(year)
+
             scp_return = single_doc_processing(ID, title, year)
 
             if (scp_return != 'Empty set returned') \
@@ -83,7 +88,8 @@ def single_doc_processing(ID, title_str, year):
     # try and execpt block: catch unprocessed cases
     try:
         title = '\"' + title_str + '\"'
-        search_str = 'TITLE(' + title + ') ' + 'AND PUBYEAR = ' + str(int(year))  # fixing major problem
+        search_str = 'TITLE(' + title + ') ' + 'AND PUBYEAR = ' + str(year)
+        print(search_str)
 
         doc_srch = ElsSearch(search_str, 'scopus')
         doc_srch.execute(client, get_all=True)
@@ -106,8 +112,8 @@ def single_doc_processing(ID, title_str, year):
                 error_log_writing(ID, "Read document failed.")
                 return 'Read document failed'
         else:
-            print("Empty set returned")
-            error_log_writing(ID, "Empty set returned")
+            print("Empty set returned -- likely article not indexed in Scopus")
+            error_log_writing(ID, "Empty set returned -- likely article not indexed in Scopus")
             return 'Empty set returned'
     except:
         print('Other errors, likely query concatenation error')

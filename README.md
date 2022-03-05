@@ -48,4 +48,8 @@ Title + Year combination has the following drawbacks:
 - Scopus sometimes indexed publications published in Year X as Year (X+1) due to the time lag.
 - Title + Year is not precise mainly when there is an erratum published in the same year. In future versions, there should be a mechanism checking whether the first retrieved items is an erratum. 
 
+Future work needs to adapt to multiple choices of input data for constructing query string.
+- DOI has better returns, consider it as first choice.
+- Title + Year or Title + Year + First author's last name combination?
+
 

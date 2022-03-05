@@ -43,3 +43,9 @@ Submit issues if you have any question or comment about the code.
 ### version 1.0.0 (2022-01-22)
 - initial release.
 
+## Comments
+Title + Year combination has the following drawbacks:
+- Scopus sometimes indexed publications published in Year X as Year (X+1) due to the time lag.
+- Title + Year is not precise mainly when there is an erratum published in the same year. In future versions, there should be a mechanism checking whether the first retrieved items is an erratum. 
+
+

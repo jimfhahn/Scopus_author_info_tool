@@ -25,7 +25,10 @@ article_title_year_to_author.py: convert article information (title and publicat
 doi_to_author.py: convert article information (doi) to author lists with author given name, author surname, and author id. Developed using [elsapy Python module](https://github.com/ElsevierDev/elsapy).
 
 ## Error message interpretation
-to-do
+No authors field in scp_doc: This document can be found in Scopus. However, the record of the document lacks author fields.
+Read document failed: This document can be found in Scopus. However, for some technical reason, the record cannot be read.
+Empty set returned: No record was retrieved. Either the document was not indexed in Scopus.
+Other errors, likely query concatenation error: The search call failed. Check whether your query string was concatenated correctly. 
 
 ## Contact
 Author: Yuanxi Fu (@yuanxiesa)  

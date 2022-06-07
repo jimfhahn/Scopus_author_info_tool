@@ -1,11 +1,11 @@
-cff-version: 1.2.0
+cff-version: 1.0.1
 message: "If you use this software, please cite it as below."
 authors:
 - family-names: "Fu"
   given-names: "Yuanxi"
   orcid: "https://orcid.org/0000-0003-2726-0999"
 title: "Scopus author info tool"
-version: 1.0.0
+version: 1.0.1
 doi: 
 date-released: 2022-01-12
 url: "https://github.com/infoqualitylab/Scopus_author_info_collection"

@@ -9,14 +9,14 @@ from datetime import datetime
 
 
 def main():
-    print("Please make sure to update the config.json file with your API key, INSTOKEN, and input data file path!")
-    print("input file must have a column named \"ID\""
-          "(unique ID for each article) and a column named \"doi\" (doi of the article). Please also observe the case!")
-    print("You also need to have elsapy and pandas installed to use this script")
+    #print("Please make sure to update the config.json file with your API key, INSTOKEN, and input data file path!")
+    #print("input file must have a column named \"ID\""
+    #      "(unique ID for each article) and a column named \"doi\" (doi of the article). Please also observe the case!")
+    #print("You also need to have elsapy and pandas installed to use this script")
 
-    user_input = input("Press Y to continue, and press any other key to exit \n")
-    if user_input.lower() != 'y':
-        exit()
+    #user_input = input("Press Y to continue, and press any other key to exit \n")
+    #if user_input.lower() != 'y':
+    #    exit()
 
     # read input data: a list of papers
     con_file = open("config.json")

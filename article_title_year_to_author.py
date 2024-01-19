@@ -1,7 +1,7 @@
 # load dependencies
 from elsapy.elssearch import ElsSearch
 from elsapy.elsclient import ElsClient
-from elsapy.elsdoc import AbsDoc
+from elsapy.elsdoc import FullDoc
 import pandas as pd
 import json
 import csv
@@ -9,137 +9,80 @@ from datetime import datetime
 
 
 def main():
-    print("Please make sure to update the config.json file with your API key, INSTOKEN, and input data file path!")
-    print("input file must have a column named \"ID\""
-          "(unique ID for each article), a column named \"title\"(title of the article), "
-          "and a column named \"year\"(publication year of the article). Please also observe the case!")
-    print("You also need to have elsapy and pandas installed to use this script")
-
-    user_input = input("Press Y to continue, and press any other key to exit \n ")
-    if user_input.lower() != 'y':
-        exit()
-
-    # read input data: a list of papers
-    con_file = open("config.json")
-    config = json.load(con_file)
-    con_file.close()
+    # Load configuration
+    with open("config.json") as con_file:
+        config = json.load(con_file)
 
     input_df = pd.read_csv(config['input_file'])
 
-    # create output file
     out_file_name = 'output_' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
-
     error_log_name = initiate_error_log()
 
     with open(out_file_name, 'w', newline='', encoding='utf-8') as o:
         writer = csv.writer(o)
-        writer.writerow(
-            ["ID", "original_title", "scp_title", "title_match(true/false)", "author_given_name", 'author_surname',
-             'author_id'])
+        writer.writerow(["doi", "original_title", "scp_title", "title_match(true/false)", "creator", "scopus_author_id"])
 
-        for ID, title, year in zip(input_df['ID'], input_df['title'], input_df['year']):
-
+        for title, year in zip(input_df['title'], input_df['year']):
             ## ensure correct data types
-            ID = int(ID)
             title = str(title)
             year = int(year)
 
-            scp_return = single_doc_processing(ID, title, year, error_log_name)
+            doi, creator, scp_title, scopus_author_id = single_doc_processing(title, year, error_log_name, config)
 
-            if (scp_return != 'Empty set returned') \
-                    and (scp_return != 'Read document failed') \
-                    and (scp_return != "No authors field in scp_doc") \
-                    and (scp_return != 'Other errors, likely query concatenation error'):
-                my_authors = scp_return[0]['author']
+            # check whether title matches
+            set1 = set(title.lower().split(" "))
+            set2 = set(scp_title.lower().split(" "))
+            title_match = (set1 == set2)
 
-                # check whether title matches
-                set1 = set(title.lower().split(" "))
-                set2 = set(scp_return[1].lower().split(" "))
-                title_match = (set1 == set2)
-
-                print('article ', str(int(ID)), ': number of authors ' + str(len(my_authors)))
-                # write output
-                for author_item in my_authors:
-                    writer.writerow([ID,
-                                     title,
-                                     scp_return[1],
-                                     title_match,
-                                     author_item['preferred-name']['ce:given-name'],
-                                     author_item['preferred-name']['ce:surname'],
-                                     author_item['@auid']])
+            print('article ', title, ': creator ' + creator)
+            # write output
+            writer.writerow([doi, title, scp_title, title_match, creator, scopus_author_id])
 
 
-def single_doc_processing(ID, title_str, year, error_log_name):
-    """
-    Function: single_doc_processing
-    :param ID: the id of the article
-    :param title_str: the title
-    :param year: the publication year
-    :return: if processed, a dictionary called my authors, and the title retrieved from scopus
-    """
-
-    # load configuration
-    con_file = open("config.json")
-    config = json.load(con_file)
-    con_file.close()
-
+def single_doc_processing(title_str, year, error_log_name, config):
     # Initialize client
     client = ElsClient(config['apikey'])
-    client.inst_token = config['insttoken']
 
-    # try and execpt block: catch unprocessed cases
-    try:
-        title = '\"' + title_str + '\"'
-        search_str = 'TITLE(' + title + ') ' + 'AND PUBYEAR = ' + str(year)
-        print('\n' + 'Query: ' + search_str) # allow user to visually check whether the query was correctly constructed
+    # Initialize doc search object and execute search, retrieving all results
+    doc_srch = ElsSearch(title_str + ' AND PUBYEAR IS ' + str(year), 'scopus')
+    doc_srch.execute(client, get_all = True)
 
-        doc_srch = ElsSearch(search_str, 'scopus')
-        doc_srch.execute(client, get_all=True)
+    # Write to dump.json
+    with open('dump.json', 'w') as f:
+        json.dump(doc_srch.results, f)
 
-        if doc_srch.hasAllResults():  # retrieve the document
-            my_scopus_id = doc_srch.results[0]['dc:identifier'].split(':')[1]
-            scp_doc = AbsDoc(scp_id=my_scopus_id)
+    # Load JSON data
+    with open('dump.json') as f:
+        data = json.load(f)
 
-            if scp_doc.read(client):
-                my_authors = scp_doc.data['authors']
-                scp_title = scp_doc.title  # save the retrieved title for later double checking
-                if my_authors:
-                    return my_authors, scp_title
-                else:
-                    print("No authors field in scp_doc")
-                    error_log_writing(ID, "No authors field in scp_doc", error_log_name)
-                    return "No authors field in scp_doc"
-            else:
-                print("Read document failed.")
-                error_log_writing(ID, "Read document failed.", error_log_name)
-                return 'Read document failed'
-        else:
-            print("Empty set returned")
-            error_log_writing(ID, "Empty set returned", error_log_name)
-            return 'Empty set returned'
-    except:
-        print('Other errors, likely query concatenation error')
-        error_log_writing(ID, 'Other errors, likely query concatenation error', error_log_name)
-        return 'Other errors, likely query concatenation error'
+    # Convert year to string for comparison
+    year_str = str(year)
+
+    # Assuming each document in the JSON data has 'dc:title', 'dc:creator', 'prism:coverDate', 'prism:doi', and 'dc:identifier' fields
+    for doc in data:
+        if doc['dc:title'] == title_str and doc['prism:coverDate'].startswith(year_str):
+            # Retrieve the doi, creator, title, and scopus author id
+            doi = doc.get('prism:doi', "")
+            creator = doc.get('dc:creator', "")
+            scp_title = doc.get('dc:title', "")
+            scopus_author_id = doc.get('dc:identifier', "")
+            return doi, creator, scp_title, scopus_author_id
+
+    print("Document not found in JSON data.")
+    error_log_writing("Document not found in JSON data.", error_log_name)
+    return "", "", "", ""
 
 
 def initiate_error_log():
     file_name = 'error_log_' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + '.txt'
-    file = open(file_name, 'w')
-    file.close()
+    with open(file_name, 'w') as file:
+        pass
     return file_name
 
 
-def error_log_writing(article_id, message, file_name):
-    """
-    Function: error_log_writing
-    :param article_id: the id of the article that did not get processed
-    :param message: message about why this article was not processed
-    :return: nothing
-    """
-    error_log_file = open(file_name, 'a')
-    error_log_file.write(str(article_id) + ": " + message + '\n')
-    error_log_file.close()
+def error_log_writing(message, file_name):
+    with open(file_name, 'a') as error_log_file:
+        error_log_file.write(message + '\n')
 
 
 if __name__ == '__main__':

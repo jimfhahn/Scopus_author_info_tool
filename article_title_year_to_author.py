@@ -15,28 +15,24 @@ def main():
 
     input_df = pd.read_csv(config['input_file'])
 
-    out_file_name = 'output_' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
+    # out_file_name = 'output_article_title_year_to_author' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
+    out_file_name = 'output_article_title_year_to_author' + '.csv'
+
     error_log_name = initiate_error_log()
 
     with open(out_file_name, 'w', newline='', encoding='utf-8') as o:
         writer = csv.writer(o)
-        writer.writerow(["doi", "original_title", "scp_title", "title_match(true/false)", "creator", "scopus_author_id"])
+        writer.writerow(["doi", "article_title", "article_abstract", "article_publication_year", "scopus_author_id", "first_author_name", "num_references", "num_citations", "funder_name", "grant_id"])
 
         for title, year in zip(input_df['title'], input_df['year']):
             ## ensure correct data types
             title = str(title)
             year = int(year)
 
-            doi, creator, scp_title, scopus_author_id = single_doc_processing(title, year, error_log_name, config)
+            doi, first_author_name, abstract, publication_year, scopus_author_id, num_references, num_citations, funder_name, grant_id = single_doc_processing(title, year, error_log_name, config)
 
-            # check whether title matches
-            set1 = set(title.lower().split(" "))
-            set2 = set(scp_title.lower().split(" "))
-            title_match = (set1 == set2)
-
-            print('article ', title, ': creator ' + creator)
             # write output
-            writer.writerow([doi, title, scp_title, title_match, creator, scopus_author_id])
+            writer.writerow([doi, title, abstract, publication_year, scopus_author_id, first_author_name, num_references, num_citations, funder_name, grant_id])
 
 
 def single_doc_processing(title_str, year, error_log_name, config):
@@ -58,19 +54,24 @@ def single_doc_processing(title_str, year, error_log_name, config):
     # Convert year to string for comparison
     year_str = str(year)
 
-    # Assuming each document in the JSON data has 'dc:title', 'dc:creator', 'prism:coverDate', 'prism:doi', and 'dc:identifier' fields
+    # Assuming each document in the JSON data has the required fields
     for doc in data:
         if doc['dc:title'] == title_str and doc['prism:coverDate'].startswith(year_str):
-            # Retrieve the doi, creator, title, and scopus author id
+            # Retrieve the required fields
             doi = doc.get('prism:doi', "")
-            creator = doc.get('dc:creator', "")
-            scp_title = doc.get('dc:title', "")
+            first_author_name = doc.get('dc:creator', "")
+            abstract = doc.get('dc:description', "")
+            publication_year = doc.get('prism:coverDate', "")[:4]  # Assuming the date is in the format 'YYYY-MM-DD'
             scopus_author_id = doc.get('dc:identifier', "")
-            return doi, creator, scp_title, scopus_author_id
+            num_references = ""  # This field is not typically included in the JSON data
+            num_citations = doc.get('citedby-count', "")
+            funder_name = doc.get('prism:fundingAgencies', "")
+            grant_id = doc.get('prism:fundingReferences', "")
+            return doi, first_author_name, abstract, publication_year, scopus_author_id, num_references, num_citations, funder_name, grant_id
 
     print("Document not found in JSON data.")
     error_log_writing("Document not found in JSON data.", error_log_name)
-    return "", "", "", ""
+    return "", "", "", "", "", "", "", "", ""
 
 
 def initiate_error_log():
